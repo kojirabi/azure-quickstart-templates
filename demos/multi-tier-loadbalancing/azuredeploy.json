@@ -62,7 +62,7 @@
     "vmSize": {
       "type": "string",
       "minLength": 1,
-      "defaultValue": "Standard_D2s_v3",
+      "defaultValue": "Standard_D2s_v5",
       "metadata": {
         "description": "Size of the virtual machine, must be available in the virtual machine's location"
       }
@@ -160,6 +160,47 @@
           "destinationAddressPrefix": "*"
         }
       }
+    ],
+    "networkSecurityGroupAppGwRule": [
+      {
+        "name": "Allow-HTTP",
+        "properties": {
+          "priority": 1000,
+          "access": "Allow",
+          "direction": "Inbound",
+          "destinationPortRange": "80",
+          "protocol": "Tcp",
+          "sourceAddressPrefix": "*",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*"
+        }
+      },
+      {
+        "name": "Allow-GwMgr",
+        "properties": {
+          "priority": 1001,
+          "access": "Allow",
+          "direction": "Inbound",
+          "destinationPortRange": "65200-65535",
+          "protocol": "Tcp",
+          "sourceAddressPrefix": "GatewayManager",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*"
+        }
+      },
+      {
+        "name": "Allow-LB",
+        "properties": {
+          "priority": 1002,
+          "access": "Allow",
+          "direction": "Inbound",
+          "destinationPortRange": "*",
+          "protocol": "*",
+          "sourceAddressPrefix": "AzureLoadBalancer",
+          "sourcePortRange": "*",
+          "destinationAddressPrefix": "*"
+        }
+      }
     ]
   },
   "resources": [
@@ -203,7 +244,7 @@
       "name": "[concat(variables('region-vnet-name'), copyIndex(), '-', variables('vnet-front-end-subnet'), '-nsg')]",
       "location": "[variables('region')[copyIndex()]]",
       "properties": {
-        "securityRules": "[variables('networkSecurityGroupAllowRdpRule')]"
+        "securityRules": "[variables('networkSecurityGroupAppGwRule')]"
       },
       "copy": {
         "name": "front-end-nsg-loop",
@@ -715,7 +756,10 @@
         "displayName": "region-appgw-pips"
       },
       "properties": {
-        "publicIPAllocationMethod": "Dynamic"
+        "publicIPAllocationMethod": "Static"
+      },
+      "sku": {
+        "name": "Standard"
       },
       "copy": {
         "name": "region-appgw-pips-loop",
@@ -738,7 +782,7 @@
       "properties": {
         "sku": {
           "name": "[parameters('appGW-skuName')]",
-          "tier": "Standard",
+          "tier": "Standard_v2",
           "capacity": "[parameters('appGW-capacity')]"
         },
         "gatewayIPConfigurations": [
