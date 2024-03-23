@@ -426,7 +426,7 @@
       "properties": {
         "sku": {
           "name": "[parameters('skuName')]",
-          "tier": "Standard",
+          "tier": "Standard_v2",
           "capacity": "[parameters('appGatewayCapacity')]"
         },
         "gatewayIPConfigurations": [
